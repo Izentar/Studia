@@ -11,17 +11,18 @@
 
 #include "headers/student.h"
 
-
 using namespace std;
 
 int main(int ac, char* av[], char* ev[])
 {
+    S_group A;
+    Student *tmp;
+    tmp=create(&A);
+    delete tmp;
+
+
+
     cout << "Hello world!" << endl;
-
-    S_group *A;
-    A=new S_group;
-
-
 
     return 0;
 }

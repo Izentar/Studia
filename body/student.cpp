@@ -13,9 +13,42 @@
 #include <limits>
 #include "../headers/student.h"
 
+static vector <Student *> stud_all;
+static vector <S_group *> gr_all;
+static unsigned long int MAX_STUD = stud_all.max_size()/LESS_VECTOR;
+static unsigned long int MAX_GR = gr_all.max_size()/LESS_VECTOR;
+
+//overload
+
+
+
 //functions
 
-int load_again(unsigned int *tmp)
+int find_v(vector <Student *> st, Student* what)
+{
+    for (unsigned int i=0; i<st.size(); i++)
+    {
+        if(st[i]==what)
+        {
+            return i;
+        }
+    }
+    return true;
+}
+
+int find_v(vector <S_group *> gr, S_group* what)
+{
+    for (unsigned int i=0; i<gr.size(); i++)
+    {
+        if(gr[i]==what)
+        {
+            return i;
+        }
+    }
+    return true;
+}
+
+int load_again(unsigned int* const tmp)
 {
     while(!cin)
     {
@@ -31,7 +64,7 @@ int load_again(unsigned int *tmp)
             #ifdef DEBUG
             cout << "Succeed fail: load_again(unsigned int *tmp)" << endl;
             #endif
-            return 1;
+            return true;
         }
     }
 
@@ -39,10 +72,10 @@ int load_again(unsigned int *tmp)
     cout << "Succeed: load_again(unsigned int *tmp)" << endl;
     #endif
 
-    return 0;
+    return false;
 }
 
-int load_again(string *tmp)
+int load_again(string* const tmp)
 {
     while(!cin)
     {
@@ -56,152 +89,143 @@ int load_again(string *tmp)
             #ifdef DEBUG
             cout << "Succeed fail: load_again(string *tmp)" << endl;
             #endif
-            return 1;
+            return true;
         }
     }
     #ifdef DEBUG
     cout << "Succeed: load_again(string *tmp)" << endl;
     #endif
 
-    return 0;
+    return false;
 }
 
-int add(Student *st, S_group *sgr)
+int entitle (string* const n, string* const sn, unsigned int* const ix)
 {
-    string n, sn;
-    unsigned int ix;
 
+    string tmp2;
     cout << "Please specify:" << endl;
     cout << "Name: ";
-    getline(cin, n);
-    if(load_again(&n))
+    getline(cin, *n);
+    if(load_again(n))
     {
         #ifdef DEBUG
         cout << "Succeed fail: add(Student *st, S_group *sgr)" << endl;
         #endif
-        return 1;
+        return true;
     }
 
     cout << "Surname: ";
-    getline(cin, sn);
-    if(load_again(&sn))
+    getline(cin, *sn);
+    if(load_again(sn))
     {
         #ifdef DEBUG
         cout << "Succeed fail: add(Student *st, S_group *sgr)" << endl;
         #endif
-        return 1;
+        return true;
     }
 
     cout << "Index: ";
-    cin >> ix;
-    if(load_again(&ix))
+    cin >> *ix;
+    if(load_again(ix))
     {
         #ifdef DEBUG
         cout << "Succeed fail: add(Student *st, S_group *sgr)" << endl;
         #endif
-        return 1;
-    }
-
-    // real program
-
-    if(sgr->pnt_child!=NULL)
-    {
-        cout << "hej" << endl;
-
-        Student *tmp, *tmp2;
-        tmp2=new Student;
-
-        tmp=st->pnt_next;
-        st->pnt_next=tmp2;
-        tmp2->pnt_back=st;
-        tmp2->pnt_next=tmp;
-        tmp->pnt_back=tmp2;
-
-        tmp2->name=n;
-        tmp2->surname=sn;
-        tmp2->index=ix;
-
-        #ifdef DEBUG
-        cout << "Succeed: add(Student *st, S_group *sgr)/sgr->pnt_child!=NULL" << endl;
-        #endif
-
-    }
-    else
-    {
-
-        st->pnt_belong=sgr;
-        sgr->pnt_child=st;
-
-        #ifdef DEBUG
-        cout << "Succeed: add(Student *st, S_group *sgr)/sgr->pnt_child==NULL" << endl;
-        #endif
+        return true;
     }
 
     #ifdef DEBUG
-    cout << "Succeed: add(Student *st, S_group *sgr)" << endl;
+    cout << "Succeed: entitle (string *n, string *sn, unsigned int *ix)" << endl;
     #endif
 
-    return 0;
+    return false;
 }
 
 // class functions
 
-Student::Student(string n, string sn, unsigned int ix)
-:pnt_belong(NULL), pnt_next(NULL), pnt_back(NULL)
+int connect(Student* const st, S_group* const sgr)
 {
-    name=n;
-    surname=sn;
-    index=ix;
 
+    st->pnt_belong.push_back(sgr);
+    sgr->pnt_child.push_back(st);
 
     #ifdef DEBUG
-    cout << "Create Student:" << name << " " << surname << " " << index << endl;
+    cout << "Succeed: connect(Student *st, S_group *sgr)" << endl;
+    #endif
+
+    return false;
+}
+
+Student* create (S_group* const sgr)
+{
+    if(stud_all.size()>MAX_STUD)
+    {
+        cout << "Max capacity" << endl;
+        return nullptr;
+    }
+
+    Student *tmp;
+    tmp=new Student;
+    stud_all.push_back(tmp);
+
+    if(connect(tmp, sgr))
+    {
+        stud_all.pop_back();
+        delete tmp;
+        return nullptr;
+    }
+
+    #ifdef DEBUG
+    cout << "Succeed: create (S_group *sgr)" << endl;
+    #endif
+
+    return tmp;
+}
+
+Student::Student(string n, string sn, unsigned int ix)
+{
+    if(stud_all.size()>MAX_STUD)
+    {
+        cout << "You are approaching the border of memory" << endl;
+    }
+
+    string nt, snt;
+    unsigned int ixt;
+    if(entitle(&nt, &snt, &ixt))
+    {
+        cout << "Program can not perform this operation (names set to default)" << endl;
+        name=n;
+        surname=sn;
+        index=ix;
+    }
+    else
+    {
+        name=nt;
+        surname=snt;
+        index=ixt;
+    }
+
+
+    stud_all.push_back(this);
+
+    #ifdef DEBUG
+    cout << "Created Student:" << "Name-> " << name << " Surname-> " << surname << " Index-> " << index << endl;
     #endif
 }
 
-Student::~Student()
+Student::~Student()     // czy na pewno zadziala if
 {
-    Student *tmp;
-    S_group *stmp;
-
-    if(this->pnt_back==NULL&&this->pnt_next==NULL)
+    int tmp;
+    if((tmp=find_v(stud_all, this))==true)
     {
-        stmp=this->pnt_belong;
-        stmp=NULL;
-        delete this;
-        return;
+        stud_all.erase(tmp);
     }
-    if(this->pnt_back!=NULL)
+    else
     {
-        tmp=this->pnt_back;
-        tmp->pnt_next=this->pnt_next;
+        #ifdef DEBUG
+        cout << "In| ~Student() | could not find a pair" << endl;
+        #endif
     }
-
-    if(this->pnt_next!=NULL)
-    {
-        tmp=this->pnt_next;
-        tmp->pnt_back=this->pnt_back;
-    }
-
-    if(this->pnt_belong!=NULL)
-    {
-        if(this->pnt_next!=NULL)
-        {
-            tmp=this->pnt_next;
-            tmp->pnt_belong=this->pnt_belong;
-            stmp=this->pnt_belong;
-            stmp->pnt_child=tmp;
-        }
-        else
-        {
-            #ifdef DEBUG
-            cout << "Fail: Student::~Student()/this->pnt_next==NULL" << endl;
-            #endif
-        }
-
-    }
-
-    delete this;
 
     #ifdef DEBUG
     cout << "Delete Student:" << name << " " << surname << " " << index << endl;
@@ -209,53 +233,45 @@ Student::~Student()
 }
 
 S_group::S_group(string n)
-:pnt_next(NULL), pnt_back(NULL)
 {
-    name=n;
-
-    pnt_child=new Student;
-    pnt_child->pnt_belong=this;
-    if(add(pnt_child, this))
+    if(gr_all.size()>MAX_GR)
     {
-        cout << "Empty group" << endl;
+        cout << "You are approaching the border of memory" << endl;
+    }
+
+    string tmp;
+    cout << "Enter the name: ";
+    getline(cin, tmp);
+    if(load_again(&tmp))
+    {
+        cout << "Program can not perform this operation (names set to default)" << endl;
+        name=n;
+    }
+    else
+    {
+        name=tmp;
     }
 
     #ifdef DEBUG
-    cout << "Create S_group:" << name << endl;
+    cout << "Created S_group:" << name << endl;
     #endif
 }
 
-S_group::~S_group()
+S_group::~S_group() // tutaj tez czy if zadziala
 {
-    Student *tmp, *tmp2;
-    S_group *stmp;
-    tmp=this->pnt_child;
-
-    while(tmp!=NULL)
+    int tmp;
+    if((tmp=find_v(gr_all, this))==true)
     {
-        tmp2=tmp->pnt_next;
-        tmp->~Student();
-        tmp=tmp2;
+        gr_all.erase(tmp);
+    }
+    else
+    {
         #ifdef DEBUG
-        cout << "Succeed delete: S_group::~S_group()" << name << endl;
+        cout << "In| ~Student() | could not find a pair" << endl;
         #endif
-
-    }
-
-    if(this->pnt_back!=NULL)
-    {
-        stmp=this->pnt_back;
-        stmp->pnt_next=this->pnt_next;
-    }
-
-    if(this->pnt_next!=NULL)
-    {
-        stmp=this->pnt_next;
-        stmp->pnt_back=this->pnt_back;
     }
 
 
-    delete this;
     #ifdef DEBUG
     cout << "Delete S_group:" << name << endl;
     #endif
