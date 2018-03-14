@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 11.03.2018
+    * Update: 14.03.2018
 */
 
 #ifndef STUDENT_CPP
@@ -24,16 +24,24 @@ static unsigned long int MAX_GR = gr_all.max_size()/LESS_VECTOR;
 
 //functions
 
+inline void sweep ()
+{
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
 int find_v(vector <Student *> st, Student* what)
 {
     for (unsigned int i=0; i<st.size(); i++)
     {
         if(st[i]==what)
         {
+            #ifdef DEBUG
+            cout << "Founded " << i << endl;
+            #endif
             return i;
         }
     }
-    return true;
+    return -1;
 }
 
 int find_v(vector <S_group *> gr, S_group* what)
@@ -42,10 +50,18 @@ int find_v(vector <S_group *> gr, S_group* what)
     {
         if(gr[i]==what)
         {
+            #ifdef DEBUG
+            cout << "Founded " << i << endl;
+            #endif
             return i;
         }
     }
-    return true;
+    return -1;
+}
+
+int find_v(S_group* , Student* what)
+{
+
 }
 
 int load_again(unsigned int* const tmp)
@@ -54,11 +70,12 @@ int load_again(unsigned int* const tmp)
     {
 
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        sweep();    // must be
 
         cout << "Something went wrong, try again (or end program writing '0'): ";
 
         cin >> *tmp;
+        sweep();    // must be
         if(cin && *tmp==0)
         {
             #ifdef DEBUG
@@ -80,7 +97,7 @@ int load_again(string* const tmp)
     while(!cin)
     {
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        sweep();    //must be
 
         cout << "Something went wrong, try again (or end program writing 'NULL'): ";
         cin >> *tmp;
@@ -126,6 +143,7 @@ int entitle (string* const n, string* const sn, unsigned int* const ix)
 
     cout << "Index: ";
     cin >> *ix;
+    sweep();    //must be
     if(load_again(ix))
     {
         #ifdef DEBUG
@@ -156,6 +174,17 @@ int connect(Student* const st, S_group* const sgr)
     return false;
 }
 
+unsigned int S_group::index_min_max()
+{
+    unsigned int MIN=numeric_limits<int>::max();
+    unsigned int MAX=0;
+
+    for (int i=0; i<this->pnt_child.size(); i++)
+    {
+
+    }
+}
+
 Student* create (S_group* const sgr)
 {
     if(stud_all.size()>MAX_STUD)
@@ -166,11 +195,9 @@ Student* create (S_group* const sgr)
 
     Student *tmp;
     tmp=new Student;
-    stud_all.push_back(tmp);
 
     if(connect(tmp, sgr))
     {
-        stud_all.pop_back();
         delete tmp;
         return nullptr;
     }
@@ -210,15 +237,19 @@ Student::Student(string n, string sn, unsigned int ix)
 
     #ifdef DEBUG
     cout << "Created Student:" << "Name-> " << name << " Surname-> " << surname << " Index-> " << index << endl;
+    cout << "STUD_ALL " << stud_all[stud_all.size()-1]->name << endl;
     #endif
 }
 
-Student::~Student()     // czy na pewno zadziala if
+Student::~Student()     // usunięcie studenta z gupy
 {
     int tmp;
-    if((tmp=find_v(stud_all, this))==true)
+    if((tmp=find_v(stud_all, this))!=-1)
     {
-        stud_all.erase(tmp);
+        #ifdef DEBUG
+        cout << endl << "STUD_ALL ERASE " << stud_all[tmp]->name << endl;
+        #endif
+        stud_all.erase(stud_all.begin()+tmp);
     }
     else
     {
@@ -226,6 +257,8 @@ Student::~Student()     // czy na pewno zadziala if
         cout << "In| ~Student() | could not find a pair" << endl;
         #endif
     }
+
+    if((tmp=find_v(this->pnt_belong, this)))
 
     #ifdef DEBUG
     cout << "Delete Student:" << name << " " << surname << " " << index << endl;
@@ -252,22 +285,27 @@ S_group::S_group(string n)
         name=tmp;
     }
 
+    gr_all.push_back(this);
+
     #ifdef DEBUG
-    cout << "Created S_group:" << name << endl;
+    cout << "Created S_group :" << name << endl;
     #endif
 }
 
-S_group::~S_group() // tutaj tez czy if zadziala
+S_group::~S_group()
 {
     int tmp;
-    if((tmp=find_v(gr_all, this))==true)
+    if((tmp=find_v(gr_all, this))!=-1)
     {
-        gr_all.erase(tmp);
+        #ifdef DEBUG
+        cout << endl << "GR_ALL ERASE " << gr_all[tmp]->name << endl;
+        #endif
+        gr_all.erase(gr_all.begin()+tmp);
     }
     else
     {
         #ifdef DEBUG
-        cout << "In| ~Student() | could not find a pair" << endl;
+        cout << "In| ~S_group() | could not find a pair" << endl;
         #endif
     }
 

@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 11.03.2018
+    * Update: 14.03.2018
 */
 
 #define DEBUG
@@ -15,12 +15,18 @@ using namespace std;
 
 int main(int ac, char* av[], char* ev[])
 {
-    S_group A;
-    Student *tmp;
+    S_group *b, *c, *d;
+    /*Student *tmp, *tmp2, *tmp3;
     tmp=create(&A);
-    delete tmp;
+    tmp2=create(&A);
+    tmp3=create(&A);
+    delete tmp3;*/
 
+    b=new S_group;
+    c=new S_group;
+    d=new S_group;
 
+    delete c;
 
     cout << "Hello world!" << endl;
 

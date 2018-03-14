@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 11.03.2018
+    * Update: 14.03.2018
 */
 
 #ifndef STUDENT_H
@@ -49,7 +49,7 @@ class S_group
 
         friend int connect(Student *st, S_group *sgr);
         friend Student* create (S_group *sgr);
-        //friend Student::~Student();
+        unsigned int index_min_max ();
         //int cpm();
 
 };
