@@ -13,6 +13,9 @@
 + zmiana nazw
 + dodaj grupę
 + wypisywanie wszystkich grup/studentów
+- zmienić index z int na string
+- czy numer indeksu sie nie powtarza
+- możliwość zmiany parametrów studenta
 */
 
 #ifndef STUDENT_CPP
@@ -21,6 +24,7 @@
 
 #include <iostream>
 #include <limits>
+#include <fstream>
 #include "../headers/student.h"
 
 static vector <Student *> stud_all;
@@ -35,8 +39,9 @@ int if_repeated (string na);
 inline int find_v(vector <Student *> const st, Student* const what);
 inline int find_v(vector <S_group *> const gr, S_group* const what);
 
-int load_again(unsigned int* const tmp);
-int load_again(string* const tmp);
+int load_again(unsigned int* tmp);
+int load_again(int* tmp);
+int load_again(string* tmp);
 
 inline void sweep ();
 
@@ -72,48 +77,152 @@ ostream & operator<< (ostream& outgo, const vector <S_group *> &gr)
     return outgo << "End" << endl;
 }
 
-S_group  operator+ (const S_group &gr, const S_group &gr2)  // ????    może zadlekrarować jako funkję w klasie od razu
+S_group & S_group::operator= (const S_group &gr)
+{
+    if_min_max=false;
+
+    pnt_child.clear();
+
+    for (unsigned int i=0; i<gr.pnt_child.size(); i++)
+    {
+        pnt_child.push_back(gr.pnt_child[i]);
+    }
+
+    return *this;
+}
+
+S_group & S_group::operator+ (const S_group &gr)
 {
     S_group tmp;
+    Student *ind;
 
     for (unsigned int i=0; i<gr.pnt_child.size(); i++)     //copy
     {
         tmp.pnt_child.push_back(gr.pnt_child[i]);
-        gr.pnt_child[i]->pnt_belong.push_back(&tmp);
+        ind=gr.pnt_child[i];
+        ind->pnt_belong.push_back(&tmp);
     }
 
-    for (unsigned int i=0; i<gr2.pnt_child.size(); i++)     // find the same pointers
+    for (unsigned int i=0; i<pnt_child.size(); i++)     // find the same pointers
     {
-        if(find_v(gr.pnt_child, gr2.pnt_child[i])==-1)  // not found
+        if(find_v(gr.pnt_child, pnt_child[i])==-1)  // not found
         {
-            tmp.pnt_child.push_back(gr2.pnt_child[i]);
-            gr.pnt_child[i]->pnt_belong.push_back(&tmp);
+            tmp.pnt_child.push_back(pnt_child[i]);
+            ind=pnt_child[i];
+            ind->pnt_belong.push_back(&tmp);
         }
     }
 
     return tmp;
 }
 
-S_group & operator+= (const S_group &gr, const S_group &gr2)
+S_group & S_group::operator+= (const S_group &gr)   //???
 {
+    Student *ind;
+    if_min_max=false;
 
-    for (unsigned int i=0; i<gr.pnt_child.size(); i++)     //copy
+    for (unsigned int i=0; i<gr.pnt_child.size(); i++)
     {
-        if(find_v(this->pnt_child, gr.pnt_child[i])==-1)  // not found
+        if(find_v(pnt_child, gr.pnt_child[i])==-1)  // not found
         {
-            this->pnt_child.push_back(gr.pnt_child[i]);
-            gr.pnt_child[i]->pnt_belong.push_back(this);
+            pnt_child.push_back(gr.pnt_child[i]);
+            ind=gr.pnt_child[i];
+            ind->pnt_belong.push_back(this);
+        }
+    }
+    return *this;
+}
+
+S_group & S_group::operator* (const S_group &gr)
+{
+    S_group tmp;
+    Student *ind;
+
+    for (unsigned int i=0; i<pnt_child.size(); i++)     // find the same pointers
+    {
+        if(find_v(gr.pnt_child, pnt_child[i])!=-1)  // found
+        {
+            tmp.pnt_child.push_back(pnt_child[i]);
+            ind=pnt_child[i];
+            ind->pnt_belong.push_back(&tmp);
         }
     }
 
-
-    return ;
+    return tmp;
 }
 
+S_group & S_group::operator*= (const S_group &gr)   //???
+{
+    Student *ind;
+    if_min_max=false;
+
+    for (unsigned int i=0; i<gr.pnt_child.size(); i++)
+    {
+        if(find_v(pnt_child, gr.pnt_child[i])!=-1)  // found
+        {
+            pnt_child.push_back(gr.pnt_child[i]);
+            ind=gr.pnt_child[i];
+            ind->pnt_belong.push_back(this);
+        }
+    }
+    return *this;
+}
+
+
 //file functions
+#ifdef FILES
+bool total_saving()     // first student then S_group
+{
+    fstream file;
+    file.open("Save", ios::out | ios::trunc | ios::binary);
+
+    if(file.good()==true)
+    {
+        #ifdef DEBUG
+        cout << "Enter the file" << endl;
+        #endif
+    }
 
 
+    for (unsigned int i=0; i<stud_all.size(); i++)
+    {
+        file.write(stud_all[i], sizeof(stud_all[i]));
+    }
 
+    for (unsigned int i=0; i<gr_all.size(); i++)
+    {
+        file.write(gr_all[i], sizeof(gr_all[i]));
+    }
+
+    file.close();
+    #ifdef DEBUG
+    cout << "File saved" << endl;
+    #endif
+}
+
+bool total_reading()        // first student then S_group
+{
+    fstream file;
+    file.open("Save", ios::in | ios::binary);
+
+    if(file.good()==true)
+    {
+        #ifdef DEBUG
+        cout << "Enter the file" << endl;
+        #endif
+    }
+
+    for (unsigned int i=0; i<stud_all.size(); i++)
+    {
+
+    }
+
+    file.close();
+    #ifdef DEBUG
+    cout << "File saved" << endl;
+    #endif
+}
+#endif
 //functions
 
 inline void sweep ()
@@ -151,7 +260,28 @@ inline int find_v(vector <S_group *> const gr, S_group* const what)     	//parti
     return -1;
 }
 
-int load_again(unsigned int* const tmp)
+void pop_space(string &tmp)
+{
+    if(tmp.size()==0)
+    {
+        return;
+    }
+
+    for (unsigned int i=tmp.size()-1; i>=0; i--)
+    {
+        if(tmp[i]==' ')
+        {
+            tmp.pop_back();
+        }
+        else
+        {
+            return;
+        }
+    }
+    return;
+}
+
+int load_again(unsigned int* tmp)
 {
     if(*tmp==0)
     {
@@ -165,26 +295,57 @@ int load_again(unsigned int* const tmp)
         sweep();    // must be
 
         cout << "Something went wrong, try again (or end program writing '0'): ";
-
         cin >> *tmp;
         sweep();    // must be
         if(cin && *tmp==0)
         {
             #ifdef DEBUG
-            cout << "Fail: load_again(unsigned int *tmp)" << endl;
+            cout << "Fail: load_again(unsigned int* const tmp)" << endl;
             #endif
             return true;
         }
     }
 
     #ifdef DEBUG
-    cout << "Succeed: load_again(unsigned int *tmp)" << endl;
+    cout << "Succeed: load_again(unsigned int* const tmp)" << endl;
     #endif
 
     return false;
 }
 
-int load_again(string* const tmp)
+int load_again(int* tmp)
+{
+    if(*tmp==0)
+    {
+        return 0;
+    }
+
+    while(!cin)
+    {
+
+        cin.clear();
+        sweep();    // must be
+
+        cout << "Something went wrong, try again (or end program writing '0'): ";
+        cin >> *tmp;
+        sweep();    // must be
+        if(cin && *tmp==0)
+        {
+            #ifdef DEBUG
+            cout << "Fail: load_again(unsigned int* const tmp)" << endl;
+            #endif
+            return true;
+        }
+    }
+
+    #ifdef DEBUG
+    cout << "Succeed: load_again(int* const tmp)" << endl;
+    #endif
+
+    return false;
+}
+
+int load_again(string* tmp)
 {
     if(*tmp=="NULL")
     {
@@ -200,19 +361,20 @@ int load_again(string* const tmp)
         if(cin && *tmp=="NULL")
         {
             #ifdef DEBUG
-            cout << "Fail: load_again(string *tmp)" << endl;
+            cout << "Fail: load_again(string* const tmp)" << endl;
             #endif
             return true;
         }
+        pop_space(*tmp);
     }
     #ifdef DEBUG
-    cout << "Succeed: load_again(string *tmp)" << endl;
+    cout << "Succeed: load_again(string* const tmp)" << endl;
     #endif
 
     return false;
 }
 
-int entitle (string* const n, string* const sn, unsigned int* const ix)
+int entitle (string* n, string* sn, unsigned int* ix)
 {
 
     string tmp2;
@@ -222,6 +384,7 @@ int entitle (string* const n, string* const sn, unsigned int* const ix)
         cout << "Please specify:" << endl;
         cout << "Name: ";
         getline(cin, *n);
+        pop_space(*n);
         if(load_again(n))
         {
             #ifdef DEBUG
@@ -232,6 +395,7 @@ int entitle (string* const n, string* const sn, unsigned int* const ix)
 
         cout << "Surname: ";
         getline(cin, *sn);
+        pop_space(*sn);
         if(load_again(sn))
         {
             #ifdef DEBUG
@@ -322,7 +486,6 @@ int if_repeated (unsigned int ind)      // generally
     #ifdef DEBUG
     cout << "Succeed: if_repeated" << endl;
     #endif
-    sweep();
 
     return -1;
 }
@@ -332,7 +495,7 @@ int if_repeated (string na)     // generally
     //int tmp;
     //Student *tmpgr;
 
-    for (unsigned int i=0; i<stud_all.size(); i++)
+    for (unsigned int i=0; i<gr_all.size(); i++)
     {
         if(gr_all[i]->name==na)
         {
@@ -379,6 +542,7 @@ inline void S_group::rename(string* const na)
     tmp=*na;
     cout << "Enter the name: ";
     getline(cin, *na);
+    pop_space(*na);
     if(load_again(na))
     {
         cout << "Program can not perform this operation (names set to default)" << endl;
@@ -391,7 +555,7 @@ inline void S_group::rename(string* const na)
     return;
 }
 
-int Student::delete_student(string name, string surname, unsigned int index)
+int Student::delete_student(string &name, string &surname, unsigned int &index)
 {
     int tmp;
     if((tmp=if_repeated(name, surname, index))!=-1)
@@ -410,7 +574,7 @@ int Student::delete_student(string name, string surname, unsigned int index)
     return 0;
 }
 
-int S_group::delete_group(string na)
+int S_group::delete_group(string &na)
 {
     int tmp;
     if((tmp=if_repeated(name))!=-1)
@@ -747,6 +911,15 @@ inline void connecT ()
 
     cout << "Chose group: ";
     getline(cin, gr);
+    if(load_again(&gr))
+    {
+        #ifdef DEBUG
+        cout << "Fail: add(Student *st, S_group *sgr)" << endl;
+        #endif
+        return;
+    }
+
+    pop_space(gr);
 
     if((tmpgr=if_repeated(gr))==-1)
     {
@@ -756,6 +929,16 @@ inline void connecT ()
 
     cout << "Chose student (index): ";
     cin >> stin;
+
+
+    if(load_again(&stin))
+    {
+        #ifdef DEBUG
+        cout << "Fail: add(Student *st, S_group *sgr)" << endl;
+        #endif
+        return;
+    }
+    sweep();
 
     if((tmpst=if_repeated(stin))==-1)
     {
@@ -800,6 +983,7 @@ inline void display_gr_pnt()
     int tmp;
     cout << "Which group`s indicators would you like to see? (group name)";
     getline(cin, na);
+    pop_space(na);
     if(load_again(&na))
     {
         #ifdef DEBUG
@@ -869,16 +1053,116 @@ inline void display_gr()
     return;
 }
 
+bool sum_log_ind(string &gr1, string &gr2, string &gr3, int &tmpgr1, int &tmpgr2)
+{
+    cout << "Which of the two groups would you like to it?" << endl;
+    getline(cin, gr1);
+    pop_space(gr1);
+    if(load_again(&gr1))
+    {
+        #ifdef DEBUG
+        cout << "Fail: sum_gr / logical_gr()" << endl;
+        #endif
+        return true;
+    }
+
+    getline(cin, gr2);
+    pop_space(gr2);
+    if(load_again(&gr2))
+    {
+        #ifdef DEBUG
+        cout << "Fail: sum_gr / logical_gr()" << endl;
+        #endif
+        return true;
+    }
+
+    cout << "Write a name of the group where you would like to save the data (it also could be " << gr1 << " or " << gr2 << ")" << endl;
+
+    getline(cin, gr3);
+    pop_space(gr3);
+    if(load_again(&gr3))
+    {
+        #ifdef DEBUG
+        cout << "Fail: sum_gr / logical_gr()" << endl;
+        #endif
+        return true;
+    }
+
+    if((tmpgr1=if_repeated(gr1))==-1)
+    {
+        cout << "Cannot find group " << gr1 << endl;
+        return true;
+    }
+    if((tmpgr2=if_repeated(gr2))==-1)
+    {
+        cout << "Cannot find group " << gr2 << endl;
+        return true;
+    }
+    return false;
+}
+
 inline void sum_gr()
 {
+    string gr1, gr2, gr3;
+    int tmpgr1, tmpgr2;
 
-    cout << "Which groups would you like to sum?" << endl;
+    if(sum_log_ind(gr1, gr2, gr3, tmpgr1, tmpgr2)==true)
+    {
+        return;
+    }
 
+    if(gr3==gr2)
+    {
+        *gr_all[tmpgr2]+=*gr_all[tmpgr1];
+    }
+    else
+    if(gr3==gr1)
+    {
+        *gr_all[tmpgr1]+=*gr_all[tmpgr2];
+    }
+    else
+    {
+        S_group *tmp;
+        tmp=new S_group;
+
+        tmp->name=gr3;
+
+        *tmp=*gr_all[tmpgr1]+*gr_all[tmpgr2];
+    }
+
+    return;
 }
 
 inline void logical_gr()
 {
-    cout << "Which groups would you like to become a part of the common?" << endl;
+    string gr1, gr2, gr3;
+    int tmpgr1, tmpgr2;
+
+    if(sum_log_ind(gr1, gr2, gr3, tmpgr1, tmpgr2)==true)
+    {
+        return;
+    }
+
+    if(gr3==gr2)
+    {
+        *gr_all[tmpgr2]*=*gr_all[tmpgr1];
+    }
+    else
+    if(gr3==gr1)
+    {
+        *gr_all[tmpgr1]*=*gr_all[tmpgr2];
+    }
+    else
+    {
+        S_group *tmp;
+        tmp=new S_group;
+
+        tmp->name=gr3;
+
+        *tmp=*gr_all[tmpgr1]**gr_all[tmpgr2];
+    }
+
+    return;
 }
 
 inline void help()
@@ -910,10 +1194,18 @@ void menu()
     string buf;
     cout << "Welcome to S-G creator!" << endl << endl;
 
+    #ifdef FILES
+    if(total_saving()==true)
+    {
+        cout << "Data could not be read. Restart program or choose different file." << endl;
+    }
+    #endif
+
     while(1)
     {
-        cout << "$$";
+        cout << endl << "$$";
         getline(cin, buf);
+        pop_space(buf);
         //sweep();
 
         if(buf=="create student"||buf=="add student")
@@ -979,6 +1271,13 @@ void menu()
         else
         if(buf=="exit"||buf=="quit"||buf=="Exit"||buf=="q")
         {
+            #ifdef FILES
+            if(total_saving()==true)
+            {
+                cout << "Data could not be save." << endl;
+            }
+            #endif
+
             delete_all();
             return;
         }
