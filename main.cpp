@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 18.03.2018
+    * Update: 19.03.2018
 */
 
 #include <iostream>
@@ -13,7 +13,17 @@ using namespace std;
 
 int main(int ac, char* av[], char* ev[])
 {
-    menu();
+    if(test())
+    {
+        cout << "something went wrong" << endl;
+    }
+    else
+    {
+        cout << "All OK" << endl;
+    }
+
+    //menu();
 
     return 0;
 }
+
