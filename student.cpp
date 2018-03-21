@@ -26,7 +26,11 @@ ostream & operator<< (ostream& outgo, const S_group &gr)
     cout << "~Name: " << gr.name << endl;
     for (unsigned int i=0; i<gr.size; i++)
     {
-        outgo << (gr.p[i]) << endl;
+        if(gr.p[i]!=nullptr)
+        {
+            cout << *(gr.p[i]) << endl;
+        }
+
     }
     return outgo << "End" << endl;
 }
@@ -36,12 +40,16 @@ S_group& S_group::operator= (const S_group &gr)
     if(this!=&gr)
     {
         if_min_max=gr.if_min_max;
-        delete [] this->p;
+        delete [] p;
+        p=nullptr;
         allocate(gr.size);
-        for (unsigned int i=0; i<gr.size; i++)
+        for (unsigned int i=0; i<gr.size; i++)      // copy pointers
         {
             p[i]=gr.p[i];
         }
+        name=gr.name;
+        min_val=gr.min_val;
+        max_val=gr.max_val;
     }
     return *this;
 }
@@ -70,11 +78,13 @@ S_group S_group::operator+ (const S_group &gr) const
         temp.p[i]=p[i];
     }
 
-    for (unsigned int i=0; i<a; i++)
+    for (unsigned int i=0; i<a; i++)        // the same copy
     {
         temp.p[size+i]=pnt[i];
     }
 
+
+    delete [] pnt;
     return temp;
 }
 
@@ -88,7 +98,6 @@ S_group S_group::operator* (const S_group &gr) const
 {
     unsigned int a=0;
     S_group temp("");
-    temp.if_min_max=false;
     Student** pnt=new Student*[gr.size];
     for (unsigned int i=0; i<gr.size; i++)      // find the same
     {
@@ -102,13 +111,14 @@ S_group S_group::operator* (const S_group &gr) const
             }
         }
     }
-    temp.allocate(size+a);
+    temp.allocate(a);
 
-    for (unsigned int i=0; i<a; i++)
+    for (unsigned int i=0; i<a; i++)    // copy the same
     {
         temp.p[i]=pnt[i];
     }
 
+    delete [] pnt;
     return temp;
 }
 
@@ -119,24 +129,20 @@ S_group& S_group::operator*= (const S_group &gr)
 }
 
 S_group::S_group(string na)
-:if_min_max(false), name(na), p(nullptr), min_val(""), max_val(""), size(0)
+:if_min_max(false), name(na), p(nullptr), min_val("0"), max_val("0"), size(0)
 {
     cout << "S_group created: " << na << endl;
 }
 
 S_group::S_group(const S_group& gr)
 {
-    if(this!=&gr)
+    if_min_max=gr.if_min_max;
+    allocate(gr.size);
+    for(unsigned int i=0; i<gr.size; i++)
     {
-        delete this->p;
-        if_min_max=gr.if_min_max;
-        allocate(gr.size);
-        for(unsigned int i=0; i<gr.size; i++)
-        {
-            p[i]=gr.p[i];
-        }
-        name=gr.name;
+        p[i]=gr.p[i];
     }
+    name=gr.name;
 
     cout << "S_group copied: " << gr.name << endl;
 }
@@ -145,50 +151,45 @@ S_group::~S_group()
 {
     cout << "S_group delete: " << name << endl;
     delete [] p;
+    p=nullptr;
 }
 
-Student::Student(string nam, string surnam, char* ind)
-:name(nam), surname(surnam)
+Student::Student(string nam, string surnam, string ind)
+:name(nam), surname(surnam), index(ind)
 {
-    allocate();
-    strcpy(index, ind);
     cout << "Student created: " << this->name << " " << this->surname << " " << this->index << endl;
 }
 
 Student::~Student()
 {
     cout << "Student deleted: " << this->name << " " << this->surname << " " << this->index << endl;
-    delete index;
 }
 
 void S_group::set_min_max()
 {
     if(if_min_max==false)
     {
-        char min_v[INDEX];
-        char max_v[INDEX];
-
         if(size==0)
         {
-            max_v[0]='\0';
-            min_v[0]='\0';
+            max_val="0";
+            min_val="0";
         }
         else
         {
-            strcpy(min_v, p[0]->index);
-            strcpy(max_v, p[0]->index);
+            min_val=p[0]->index;
+            max_val=p[0]->index;
         }
 
         for (unsigned int i=1; i<size; i++)
         {
-            if(strcmp(min_v, p[i]->index)>0)
+            if(min_val>p[i]->index)
             {
-                strcpy(min_v, p[i]->index);
+                min_val=p[i]->index;
             }
 
-            if(strcmp(max_v, p[i]->index)<0)
+            if(max_val<p[i]->index)
             {
-                strcpy(max_v, p[i]->index);
+                max_val=p[i]->index;
             }
         }
         if_min_max=true;
@@ -202,31 +203,22 @@ void S_group::display_min_max()
         this->set_min_max();
     }
 
-    cout << "Min value: ";
-    for (unsigned int i=0; min_val[i]!='\0'; i++)
-    {
-        cout << min_val[i];
-    }
-
-    cout << "  Max value: ";
-    for (unsigned int i=0; max_val[i]!='\0'; i++)
-    {
-        cout << max_val[i];
-    }
+    cout << "Min value: " << min_val;
+    cout << "  Max value: " << max_val << endl;
 }
 
-void S_group::cpy_nalloc(S_group& gr)
+void S_group::cpy_nalloc_ptr(S_group& gr)
 {
     if(this!=&gr)
     {
-        if_min_max=false;
+        if_min_max=gr.if_min_max;
         for(unsigned int i=0; i<gr.size; i++)
         {
             p[i]=gr.p[i];
         }
     }
 
-    cout << "S_group copied (NK): " << gr.name << endl;
+    cout << "S_group copied (CNP): " << gr.name << endl;
 }
 
 bool connect(S_group& gr, Student& st)
@@ -238,12 +230,13 @@ bool connect(S_group& gr, Student& st)
             return true;
         }
     }
+
     S_group temp(gr);
     delete [] gr.p;
+    gr.p=nullptr;
     gr.allocate(temp.size+1);
-    gr.cpy_nalloc(temp);
-    gr.p[gr.size]=&st;
-    gr.size++;
+    gr.cpy_nalloc_ptr(temp);
+    gr.p[gr.size-1]=&st;
 
     return false;
 }

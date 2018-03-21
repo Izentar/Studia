@@ -6,5 +6,7 @@
 
 bool test(unsigned int repeat);
 
+void menu();
+
 
 #endif

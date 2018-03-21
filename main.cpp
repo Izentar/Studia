@@ -25,10 +25,9 @@ int main(int ac, char* av[], char* ev[])
 
     //menu();
 
-
     S_group("NANA");
     Student("fa", "asf", "afaf");
-    test(1000);
+    test(10);
 
     return 0;
 }

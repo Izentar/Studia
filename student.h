@@ -21,11 +21,10 @@ class Student
 {
     string name;
     string surname;
-    char* index;
-    void allocate() {index=new char[INDEX];}
+    string index;
 
     public:
-        Student(string, string, char*);
+        Student(string, string, string);
         ~Student();
 
         friend class S_group;
@@ -41,8 +40,8 @@ class S_group
     bool if_min_max;    // false - not sorted
     string name;
     Student** p;
-    char min_val[INDEX];
-    char max_val[INDEX];
+    string min_val;
+    string max_val;
     unsigned int size;
     void allocate(unsigned int siz) {p=new Student*[size=siz];}
 
@@ -55,6 +54,7 @@ class S_group
 
         friend ostream & operator<< (ostream& outgo, const S_group &gr);
         friend bool connect(S_group& gr, Student& st);
+
         S_group& operator= (const S_group &gr);
         S_group operator+ (const S_group &gr) const;
         S_group& operator+= (const S_group &gr);
@@ -64,7 +64,7 @@ class S_group
 
         void set_min_max();
         void display_min_max();
-        void cpy_nalloc(S_group& gr);
+        void cpy_nalloc_ptr(S_group& gr);       // copy only pointers without allocation
 
 };
 
