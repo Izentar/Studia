@@ -37,12 +37,12 @@ class Student
 
 class S_group
 {
-    bool if_min_max;    // false - not sorted
+    bool &if_min_max=*(new bool);    // false - not sorted
     string name;
     Student** p;
     string min_val;
     string max_val;
-    unsigned int size;
+    unsigned int &size=*(new unsigned int);
     void allocate(unsigned int siz) {p=new Student*[size=siz];}
 
     public:

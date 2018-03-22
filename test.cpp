@@ -4,7 +4,19 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <limits>
 #include "test.h"
+
+static vector <Student *> stud_all;
+static vector <S_group *> gr_all;
+static unsigned long int MAX_STUD = stud_all.max_size()/LESS_VECTOR;
+static unsigned long int MAX_GR = gr_all.max_size()/LESS_VECTOR;
+string na, surna, ind, gr_na;
+Student *st;
+S_group *gr;
+int int_tmp;
+
 
 bool test(unsigned int repeat)
 {
@@ -72,6 +84,94 @@ bool test(unsigned int repeat)
     return false;
 }
 
+inline void sweep ()
+{
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+int find_v(vector <Student *> st, Student* what)
+{
+    for (unsigned int i=0; i<st.size(); i++)
+    {
+        if(st[i]==what)
+        {
+            #ifdef DEBUG
+            cout << "Founded " << i << endl;
+            #endif
+            return i;
+        }
+    }
+    return -1;
+}
+
+int find_v(vector <S_group *> gr, S_group* what)
+{
+    for (unsigned int i=0; i<gr.size(); i++)
+    {
+        if(gr[i]==what)
+        {
+            #ifdef DEBUG
+            cout << "Founded " << i << endl;
+            #endif
+            return i;
+        }
+    }
+    return -1;
+}
+
+int load_again(string &tmp)
+{
+    while(!cin)
+    {
+        cin.clear();
+        sweep();    //must be
+
+        cout << "Something went wrong, try again (or end program writing 'NULL'): ";
+        cin >> *tmp;
+        if(cin && *tmp=="NULL")
+        {
+            #ifdef DEBUG
+            cout << "Succeed fail: load_again(string *tmp)" << endl;
+            #endif
+            return true;
+        }
+    }
+    #ifdef DEBUG
+    cout << "Succeed: load_again(string *tmp)" << endl;
+    #endif
+
+    return false;
+}
+
+int conn()
+{
+    cout << "Index: ";
+    getline(cin, ind);
+    load_again(ind);
+
+    if((int_tmp=find_v(stud_all, ))==-1)
+    {
+        cout << "Cannot find" << endl;
+    }
+
+    cout << "Group name: ";
+    getline(cin, gr_na);
+    load_again(gr_na)
+
+    if((int_tmp=find_v(gr_all))==-1)
+    {
+        cout << "Cannot find" << endl;
+    }
+
+    #ifdef DEBUG
+    cout << "Succeed: connect(Student *st, S_group *sgr)" << endl;
+    #endif
+
+    return false;
+}
+
+
+
 void help()
 {
     cout << "create group" << endl;
@@ -110,7 +210,7 @@ void menu()
         else
         if(buf=="connect"||buf=="cn")
         {
-            connect();
+            conn();
         }
         else
         if(buf=="min max")

@@ -129,8 +129,11 @@ S_group& S_group::operator*= (const S_group &gr)
 }
 
 S_group::S_group(string na)
-:if_min_max(false), name(na), p(nullptr), min_val("0"), max_val("0"), size(0)
+:name(na), p(nullptr), min_val("0"), max_val("0")
 {
+    if_min_max=false;
+    size=0;
+
     cout << "S_group created: " << na << endl;
 }
 
@@ -143,6 +146,8 @@ S_group::S_group(const S_group& gr)
         p[i]=gr.p[i];
     }
     name=gr.name;
+    min_val=gr.min_val;
+    max_val=gr.max_val;
 
     cout << "S_group copied: " << gr.name << endl;
 }
@@ -150,6 +155,8 @@ S_group::S_group(const S_group& gr)
 S_group::~S_group()
 {
     cout << "S_group delete: " << name << endl;
+    delete &size;
+    delete &if_min_max;
     delete [] p;
     p=nullptr;
 }
