@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 20.03.2018
+    * Update: 23.03.2018
 */
 
 
@@ -15,6 +15,21 @@
 #include <cstring>
 #include "student.h"
 
+
+int find_t(const S_group &gr, const Student *p)
+{
+    for (unsigned int i=0; i<gr.size; i++)
+    {
+        if(gr.p[i]==p)
+        {
+            #ifdef DEBUG
+            cout << "Founded " << i << endl;
+            #endif
+            return i;
+        }
+    }
+    return -1;
+}
 
 ostream & operator<< (ostream& outgo, const Student &st)
 {
@@ -47,7 +62,6 @@ S_group& S_group::operator= (const S_group &gr)
         {
             p[i]=gr.p[i];
         }
-        name=gr.name;
         min_val=gr.min_val;
         max_val=gr.max_val;
     }
@@ -57,30 +71,43 @@ S_group& S_group::operator= (const S_group &gr)
 S_group S_group::operator+ (const S_group &gr) const
 {
     unsigned int a=0;
-    S_group temp("");
+    S_group temp("TEMPORARY");
     temp.if_min_max=false;
-    Student** pnt=new Student*[gr.size];
-    for (unsigned int i=0; i<gr.size; i++)      // find the same
+    Student** pnt=new Student*[size];
+
+    for (unsigned int i=0; i<size; i++)      // find different
     {
-        for (unsigned int j=0; j<size; j++)
+        if(find_t(gr, p[i])==-1)
         {
-            if(gr.p[i]!=p[j])
+            pnt[a]=p[i];
+            a++;
+        }
+
+        /*for (unsigned int j=0; j<size; j++)
+        {
+            if(gr.p[i]==p[j])
+            {
+                continue;
+            }
+            else
             {
                 pnt[a]=gr.p[i];
                 a++;
                 break;
             }
-        }
-    }
-    temp.allocate(size+a);
-    for (unsigned int i=0; i<size; i++) // copy
-    {
-        temp.p[i]=p[i];
+        }*/
     }
 
-    for (unsigned int i=0; i<a; i++)        // the same copy
+
+    temp.allocate(gr.size+a);
+    for (unsigned int i=0; i<gr.size; i++) // copy
     {
-        temp.p[size+i]=pnt[i];
+        temp.p[i]=gr.p[i];
+    }
+
+    for (unsigned int i=0; i<a; i++)        // the different
+    {
+        temp.p[gr.size+i]=pnt[i];
     }
 
 
@@ -97,11 +124,17 @@ S_group& S_group::operator+= (const S_group &gr)
 S_group S_group::operator* (const S_group &gr) const
 {
     unsigned int a=0;
-    S_group temp("");
-    Student** pnt=new Student*[gr.size];
-    for (unsigned int i=0; i<gr.size; i++)      // find the same
+    S_group temp("TEMPORARY");
+    Student** pnt=new Student*[size];
+    for (unsigned int i=0; i<size; i++)      // find the same
     {
-        for (unsigned int j=0; j<size; j++)
+        if(find_t(gr, p[i])!=-1)
+        {
+            pnt[a]=p[i];
+            a++;
+        }
+
+        /*for (unsigned int j=0; j<size; j++)
         {
             if(gr.p[i]==p[j])
             {
@@ -109,7 +142,7 @@ S_group S_group::operator* (const S_group &gr) const
                 a++;
                 break;
             }
-        }
+        }*/
     }
     temp.allocate(a);
 
@@ -134,7 +167,7 @@ S_group::S_group(string na)
     if_min_max=false;
     size=0;
 
-    cout << "S_group created: " << na << endl;
+    cout << "S_group created: " << na << " if_min_max, min_val, max_val" <<   endl;
 }
 
 S_group::S_group(const S_group& gr)
@@ -149,12 +182,12 @@ S_group::S_group(const S_group& gr)
     min_val=gr.min_val;
     max_val=gr.max_val;
 
-    cout << "S_group copied: " << gr.name << endl;
+    cout << "S_group copied: " << gr.name << " if_min_max, min_val, max_val" << endl;
 }
 
 S_group::~S_group()
 {
-    cout << "S_group delete: " << name << endl;
+    cout << "S_group delete: " << name << " if_min_max, min_val, max_val, p" << endl;
     delete &size;
     delete &if_min_max;
     delete [] p;

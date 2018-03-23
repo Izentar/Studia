@@ -2,7 +2,7 @@
     * About:  Students group creator
     * Author: Mateusz Kordowski
     * Leader: Aleksandra Paśnikowska
-    * Update: 20.03.2018
+    * Update: 23.03.2018
 */
 
 #ifndef STUDENT_H
@@ -32,8 +32,10 @@ class Student
         friend ostream & operator<< (ostream& outgo, const Student &st);
         friend bool connect(S_group& gr, Student& st);
 
-};
+        // menu
+        friend int if_repeated_st (const string& ind);
 
+};
 
 class S_group
 {
@@ -54,6 +56,7 @@ class S_group
 
         friend ostream & operator<< (ostream& outgo, const S_group &gr);
         friend bool connect(S_group& gr, Student& st);
+        friend int find_t(const S_group &gr, const Student *p);
 
         S_group& operator= (const S_group &gr);
         S_group operator+ (const S_group &gr) const;
@@ -65,6 +68,10 @@ class S_group
         void set_min_max();
         void display_min_max();
         void cpy_nalloc_ptr(S_group& gr);       // copy only pointers without allocation
+
+
+        // menu
+        friend int if_repeated_gr (const string& na);
 
 };
 
